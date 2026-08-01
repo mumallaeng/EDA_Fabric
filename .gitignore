@@ -1,0 +1,54 @@
+# Local build root
+out/
+build/
+dist/
+
+# Tool and IDE state
+.Xil/
+.Xilinx/
+.metadata/
+.settings/
+.project
+.cproject
+RemoteSystemsTempFiles/
+
+# Common generated EDA state
+*.jou
+*.log
+*.str
+*.cache/
+*.runs/
+*.sim/
+*.gen/
+*.hw/
+*.ip_user_files/
+*.srcs/
+
+# FPGA implementation and firmware build products
+*.bit
+*.bin
+*.mcs
+*.mmi
+*.ltx
+*.hwh
+*.elf
+*.o
+*.a
+*.d
+*.map
+*.lst
+*.srec
+*.hex
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
