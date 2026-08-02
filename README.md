@@ -84,11 +84,7 @@ Generated IDE workspaces, caches, logs, simulation products, synthesis outputs, 
 
 Every adapter must report host OS, CPU architecture, tool version, required capability, input identity, output location, and whether the operation can mutate source-controlled files.
 
-## Implementation Plan
-
-The detailed free-tool-first sequence and acceptance criteria are in [docs/free-tool-first-plan.md](docs/free-tool-first-plan.md).
-
-## Phase 0 Commands
+## Phase 0 Command
 
 Run the read-only host and tool preflight from the repository root:
 
@@ -96,4 +92,4 @@ Run the read-only host and tool preflight from the repository root:
 ./scripts/eda-fabric doctor
 ```
 
-See [docs/doctor-command-contract.md](docs/doctor-command-contract.md) for the JSON report schema and mutation boundary.
+The project plan, command contract, host profiles, and test results are maintained under `/Users/mumallaeng/git/Vault/projects/EDA_Fabric`.
