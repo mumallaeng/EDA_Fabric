@@ -30,6 +30,34 @@ A firmware adapter consumes an explicit hardware handoff contract containing pla
 | Existing Windows test host | first local validation target for vendor HDL and firmware adapters |
 | Linux | add later after the target distribution, architecture, tools, and board path are explicitly defined |
 
+## Target tool matrix
+
+These are adapter targets, not bundled installers. `Candidate` means the project
+defines a possible integration boundary; `Planned` means it is a later adapter;
+`External` means the tool may be called when installed and licensed but is not a
+first-release dependency.
+
+| Class | Tools | Initial status | Notes |
+| --- | --- | --- | --- |
+| Common HDL simulation | Verilator, Icarus Verilog | Candidate | cross-platform source and test execution |
+| Waveform and debug | GTKWave | Candidate | consumes generated waveform files only |
+| HDL lint and style | Verible | Planned | formatting and structural checks without an IDE workspace |
+| Open synthesis and implementation | Yosys, nextpnr | Planned | device-specific support is declared per target |
+| VHDL flow | GHDL | Planned | kept separate from Verilog/SystemVerilog parsing rules |
+| AMD FPGA EDA | Vivado | Planned | vendor adapter; host and device support are version-specific |
+| Intel FPGA EDA | Quartus Prime | Planned | vendor adapter; host and device support are version-specific |
+| Microchip FPGA EDA | Libero SoC | Planned | vendor adapter; host and device support are version-specific |
+| Lattice FPGA EDA | Radiant, Diamond, or open Lattice tools | Planned | selected per device family and license model |
+| AMD firmware | Vitis, XSCT | Planned | independent firmware adapter consuming a hardware handoff |
+| Arm MCU firmware | GNU Arm Embedded, STM32CubeIDE | Planned | target adapter; IDE metadata remains isolated |
+| Portable embedded build | CMake, Ninja, Zephyr west | Candidate | common firmware orchestration where applicable |
+| Board and debug transport | OpenOCD, J-Link tools | External | used only on a host with the cable and permission available |
+| Commercial simulation | Questa, VCS, Xcelium | External | license- and site-dependent simulator adapters |
+
+The first release does not promise every tool in this table. A tool becomes
+`Supported` only after its adapter passes capability discovery, isolated-output,
+clean-tree, version-reporting, and handoff validation on a declared host.
+
 ## Source and generated state
 
 Git tracks reviewable inputs:
@@ -55,3 +83,17 @@ Generated IDE workspaces, caches, logs, simulation products, synthesis outputs, 
 5. Add a separate firmware adapter consuming the hardware handoff contract.
 
 Every adapter must report host OS, CPU architecture, tool version, required capability, input identity, output location, and whether the operation can mutate source-controlled files.
+
+## Implementation Plan
+
+The detailed free-tool-first sequence and acceptance criteria are in [docs/free-tool-first-plan.md](docs/free-tool-first-plan.md).
+
+## Phase 0 Commands
+
+Run the read-only host and tool preflight from the repository root:
+
+```sh
+./scripts/eda-fabric doctor
+```
+
+See [docs/doctor-command-contract.md](docs/doctor-command-contract.md) for the JSON report schema and mutation boundary.
