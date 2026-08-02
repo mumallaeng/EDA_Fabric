@@ -1,0 +1,29 @@
+# Keep reviewable source text identical across macOS, Windows, and Linux.
+* text=auto eol=lf
+
+*.md text eol=lf
+*.json text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+*.v text eol=lf
+*.sv text eol=lf
+*.svh text eol=lf
+*.vhd text eol=lf
+*.vhdl text eol=lf
+*.tcl text eol=lf
+*.xdc text eol=lf
+*.sdc text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+
+# Generated hardware and firmware artifacts are binary when retained outside out/.
+*.bit binary
+*.bin binary
+*.mcs binary
+*.mmi binary
+*.ltx binary
+*.elf binary
+*.xsa binary

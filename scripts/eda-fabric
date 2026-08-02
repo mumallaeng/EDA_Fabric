@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Read-only host discovery for the EDA_Fabric repository."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import platform
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
+REMOTE_LANES_PATH = REPOSITORY_ROOT / "toolchains" / "remote-lanes.json"
+TOOL_PROBES = {
+    "verilator": ["verilator", "--version"],
+    "iverilog": ["iverilog", "-V"],
+    "yosys": ["yosys", "-V"],
+    "gtkwave": ["gtkwave", "--version"],
+    "verible-verilog-syntax": ["verible-verilog-syntax", "--version"],
+}
+
+
+def run_read_only(command: list[str]) -> tuple[int | None, str]:
+    """Run a short version or Git query without changing repository state."""
+    try:
+        result = subprocess.run(
+            command,
+            cwd=REPOSITORY_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return None, str(error)
+
+    output = (result.stdout or result.stderr).rstrip()
+    return result.returncode, output
+
+
+def git_query(*args: str) -> str | None:
+    code, output = run_read_only(["git", *args])
+    return output if code == 0 else None
+
+
+def probe_tool(command: list[str]) -> dict[str, Any]:
+    executable = shutil.which(command[0])
+    if executable is None:
+        return {"status": "unavailable", "executable": None, "version": None}
+
+    code, version = run_read_only(command)
+    return {
+        "status": "available" if code == 0 else "probe-failed",
+        "executable": executable,
+        "version": version.splitlines()[0] if version else None,
+    }
+
+
+def load_declared_lanes() -> list[dict[str, Any]]:
+    try:
+        payload = json.loads(REMOTE_LANES_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        return [{"status": "configuration-error", "detail": str(error)}]
+
+    lanes = payload.get("lanes")
+    return lanes if isinstance(lanes, list) else [{"status": "configuration-error"}]
+
+
+def doctor_report() -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "command": "eda-fabric doctor",
+        "mutation_boundary": "read-only",
+        "repository": {
+            "root": str(REPOSITORY_ROOT),
+            "revision": git_query("rev-parse", "HEAD"),
+            "status_short": (git_query("status", "--short") or "").splitlines(),
+        },
+        "host": {
+            "os": platform.system(),
+            "os_release": platform.release(),
+            "cpu_architecture": platform.machine(),
+            "python": platform.python_version(),
+        },
+        "output_root": {
+            "path": "out/",
+            "exists": (REPOSITORY_ROOT / "out").exists(),
+            "policy": "generated output only; never created by doctor",
+        },
+        "tools": {name: probe_tool(command) for name, command in TOOL_PROBES.items()},
+        "declared_remote_lanes": load_declared_lanes(),
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(prog="eda-fabric")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    doctor = subparsers.add_parser("doctor", help="report host and tool capabilities")
+    doctor.add_argument("--format", choices=["json"], default="json")
+    arguments = parser.parse_args()
+
+    if arguments.command == "doctor":
+        print(json.dumps(doctor_report(), indent=2, sort_keys=True))
+        return 0
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

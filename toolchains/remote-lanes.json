@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "lanes": [
+    {
+      "id": "macos-linux-vm-vivado",
+      "transport": "local-virtual-environment",
+      "declared_tools": ["vivado"],
+      "status": "declared-not-probed"
+    },
+    {
+      "id": "remote-windows-vivado",
+      "transport": "remote",
+      "declared_tools": ["vivado"],
+      "status": "declared-not-probed"
+    },
+    {
+      "id": "remote-linux-uvm",
+      "transport": "remote",
+      "declared_tools": ["vcs", "verdi", "uvm"],
+      "status": "declared-not-probed"
+    }
+  ]
+}
